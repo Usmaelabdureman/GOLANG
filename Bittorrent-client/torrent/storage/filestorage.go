@@ -4,14 +4,13 @@ package storage
 //credits to him.
 
 import (
+	"bittorrent/metainfo"
 	"crypto/sha1"
 	"errors"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
-
-	"bittorrent/metainfo"
 )
 
 // FileStorage is a file-based storage for torrent data

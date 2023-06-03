@@ -68,14 +68,14 @@ func listen(cl *Client) (*btListener, error) {
 	//try ports 6881-6889 first
 	for i := 6881; i < 6890; i++ {
 		//we dont support IPv6
-		l.l, err = net.Listen("tcp4", ":"+strconv.Itoa(int(i)))
+		l.l, err = net.Listen("tcp", ":"+strconv.Itoa(int(i)))
 		if err == nil {
 			l.cl.port = i
 			return l, nil
 		}
 	}
 	//if none of the above ports were avaialable, try other ones.
-	if l.l, err = net.Listen("tcp4", ":"); err != nil {
+	if l.l, err = net.Listen("tcp", ":"); err != nil {
 		return nil, errors.New("could not find port to listen")
 	}
 	ap, err := parseAddr(l.l.Addr().String())

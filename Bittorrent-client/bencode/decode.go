@@ -19,13 +19,6 @@ var benElems = map[string]string{
 	"s": "string",
 }
 
-//TODO: I should have better error handling.Specifically,
-//more error types and particularly an offset variable to
-//know where the error occured.
-
-// IncompatibleTypesError is generated when there is a type
-// incompatibility between the data structures provided
-// and the bencoded data.
 type IncompatibleTypesError struct {
 	bencType string
 	dataType string

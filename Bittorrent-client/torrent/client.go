@@ -9,19 +9,14 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
+	"github.com/anacrolix/dht"
 	"log"
 	"net"
 	"os"
 	"path"
 	"sync"
 	"time"
-
-	"github.com/anacrolix/dht"
 )
-
-const clientID = "CH"
-const version = "0001"
-const logFileName = "charo.log"
 
 // Client manages multiple torrents
 type Client struct {
@@ -34,15 +29,16 @@ type Client struct {
 	trackerAnnouncer *trackerAnnouncer
 	dhtServer        *dht.Server
 	//the reserved bytes we'll send at every handshake
-	reserved               peer_wire.Reserved
-	trackerAnnouncerCloseC chan chan struct{}
-	port                   int
-	counters               *expvar.Map
-	mu                     sync.Mutex //guards following
-	blackList              []net.IP
-	torrents               map[[20]byte]*Torrent
+	reserved peer_wire.Reserved
+	// trackerAnnouncerCloseC chan chan struct{}
+	port      int
+	counters  *expvar.Map
+	mu        sync.Mutex //guards following
+	blackList []net.IP
+	torrents  map[[20]byte]*Torrent
 }
 
+// 192.168.198.55
 // Config provides configuration for a Client.
 type Config struct {
 	//Returns a new PieceSelector instantiated for each torrent the client manages
@@ -64,6 +60,10 @@ type Config struct {
 	//BitTorrent handshakes will fail after this duration
 	HandshakeTiemout time.Duration
 }
+
+const clientID = "BC"
+const version = "0001"
+const logFileName = "bittorrent.log"
 
 // NewClient creates a new Client with the provided configuration.
 // Use `NewClient(nil)` for the default configuration.
@@ -128,9 +128,9 @@ func NewClient(cfg *Config) (*Client, error) {
 // Close calls torrent.Close for all the torrents managed by the client.
 func (cl *Client) Close() {
 	close(cl.close)
-	if cl.dhtServer != nil {
-		cl.dhtServer.Close()
-	}
+	// if cl.dhtServer != nil {
+	// 	cl.dhtServer.Close()
+	// }
 	wg := sync.WaitGroup{}
 	wg.Add(len(cl.torrents))
 	for _, t := range cl.Torrents() {
@@ -272,7 +272,6 @@ func addrToPeer(address string, source PeerSource) Peer {
 	}
 }
 
-// TODO: store the remote addr and pop when finish
 func (cl *Client) runConnection(c *conn) {
 	var err error
 	defer func() {

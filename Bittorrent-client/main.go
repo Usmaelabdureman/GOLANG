@@ -20,6 +20,7 @@ func main() {
 	flag.Parse()
 	//runtime.SetBlockProfileRate(1)
 	go func() {
+		// log.Println(http.ListenAndServe("192.168.198.182:8080", nil))
 		log.Println(http.ListenAndServe("localhost:8080", nil))
 	}()
 	cfg, err := torrent.DefaultConfig()

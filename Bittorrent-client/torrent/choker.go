@@ -6,11 +6,10 @@ import (
 	"time"
 )
 
-const optimisticSlots = 1
 const defaultMaxUploadSlots = 4
 const chokerTriggeringInterval = 10 * time.Second
 
-//choker is responsible for unchoking peers
+// choker is responsible for unchoking peers
 type choker struct {
 	t                *Torrent
 	currRound        int
@@ -51,6 +50,7 @@ func (c *choker) pickOptimisticUnchoke() {
 	}
 }
 
+// const optimisticSlots = 1
 type byRate []*connInfo
 
 func (br byRate) Len() int { return len(br) }
@@ -63,7 +63,7 @@ func (br byRate) Swap(i, j int) {
 	br[i], br[j] = br[j], br[i]
 }
 
-//reviewUnchokedPeers algorithm similar to the one used at mainline client
+// reviewUnchokedPeers algorithm similar to the one used at mainline client
 func (c *choker) reviewUnchokedPeers() {
 	defer func() {
 		c.currRound++

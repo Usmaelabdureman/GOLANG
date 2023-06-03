@@ -52,7 +52,7 @@ func (cs *connStats) onPieceHashed() {
 	cs.verifications++
 }
 
-//Deprecated
+// Deprecated
 func (cs *connStats) uploadLimitsReached() bool {
 	//if we have uploaded 200KiB more than downloaded (anacrolix has 100)
 	return cs.uploadUsefulBytes-cs.downloadUsefulBytes > (1<<10)*200

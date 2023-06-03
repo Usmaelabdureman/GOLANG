@@ -1,4 +1,0 @@
-- Avoid heavy usage of channels and use the sync package (now it is too late)
-- Fix security issue at peer_wire writeExtension func
-- Store in db completed pieces.
-

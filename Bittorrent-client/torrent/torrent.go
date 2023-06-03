@@ -155,7 +155,7 @@ func (t *Torrent) close() {
 }
 
 func (t *Torrent) dropAllConns() {
-	t.closeDhtAnnounce()
+	// t.closeDhtAnnounce()
 	//signal conns to close and wait until all conns actually close
 	//maybe we don't want to wait?
 	close(t.dropC)
@@ -432,7 +432,7 @@ func (t *Torrent) writeStatus(b *strings.Builder) {
 	if t.haveInfo() {
 		b.WriteString(fmt.Sprintf("Name: %s\n", t.mi.Info.Name))
 	}
-	b.WriteString(fmt.Sprintf("#DhtAnnounces: %d\n", t.numDhtAnnounces))
+	// b.WriteString(fmt.Sprintf("#DhtAnnounces: %d\n", t.numDhtAnnounces))
 	b.WriteString("Tracker: " + t.mi.Announce + "\tAnnounce: " + func() string {
 		if t.lastAnnounceResp != nil {
 			return "OK"
@@ -440,16 +440,16 @@ func (t *Torrent) writeStatus(b *strings.Builder) {
 		return "Not Available"
 	}() + "\t#AnnouncesSend: " + strconv.Itoa(t.numTrackerAnnouncesSend) + "\n")
 	if t.lastAnnounceResp != nil {
-		b.WriteString(fmt.Sprintf("Seeders: %d\tLeechers: %d\tInterval: %d(secs)\n", t.lastAnnounceResp.Seeders, t.lastAnnounceResp.Seeders, t.lastAnnounceResp.Interval))
+		b.WriteString(fmt.Sprintf("Seeders: %d\tLeechers: %d\tInterval: %d(secs)\n", t.lastAnnounceResp.Seeders/100, t.lastAnnounceResp.Leechers, t.lastAnnounceResp.Interval))
 	}
 	b.WriteString(fmt.Sprintf("State: %s\n", t.state()))
 	b.WriteString(fmt.Sprintf("Downloaded: %s\tUploaded: %s\tRemaining: %s\n", humanize.Bytes(uint64(t.stats.BytesDownloaded)),
 		humanize.Bytes(uint64(t.stats.BytesUploaded)), humanize.Bytes(uint64(t.stats.BytesLeft))))
 	b.WriteString(fmt.Sprintf("Connected to %d peers\n", len(t.conns)))
 	tabWriter := tabwriter.NewWriter(b, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tabWriter, "Address\t%\tUp\tDown\t")
+	fmt.Fprintln(tabWriter, "Address  \t%\tUploading \tDownloading\t")
 	for _, ci := range t.conns {
-		fmt.Fprintf(tabWriter, "%s\t%s\t%s\t%s\t\n", ci.peer.P.IP.String(),
+		fmt.Fprintf(tabWriter, "Peer Address : %s\t%s\t%s\t%s\t\n", ci.peer.P.IP.String(),
 			strconv.Itoa(int(float64(ci.peerBf.Len())/float64(t.numPieces())*100))+"%",
 			humanize.Bytes(uint64(ci.stats.uploadUsefulBytes)),
 			humanize.Bytes(uint64(ci.stats.downloadUsefulBytes)))
@@ -535,7 +535,7 @@ func (t *Torrent) metadataCompleted(infoSize int64) {
 }
 
 // this func is started in its own goroutine.
-// when we close eventCh of conn, the goroutine
+// when we close event of conn, the goroutine
 // exits
 func (t *Torrent) aggregateEvents(ci *connInfo) {
 	for e := range ci.recvC {
@@ -584,7 +584,7 @@ func (t *Torrent) sendHaves(i int) {
 func (t *Torrent) establishedConnection(ci *connInfo) bool {
 	if !t.wantConns() || t.cl.containsInBlackList(ci.peer.P.IP) {
 		ci.sendMsgToConn(drop{})
-		t.closeDhtAnnounce()
+		// t.closeDhtAnnounce()
 		t.logger.Printf("rejected a connection with peer %v\n", ci.peer.P)
 		return false
 	}
@@ -620,7 +620,7 @@ func (t *Torrent) banPeer() {
 }
 
 func (t *Torrent) banIP(ip net.IP) {
-	//myAddr := t.cl.listener.Addr().(*net.TCPAddr)
+	// myAddr := t.cl.listener.Addr().(*net.TCPAddr)
 	myAddr := getOutboundIP()
 	if ip.Equal(myAddr) || ip.Equal(net.ParseIP("127.0.0.1")) {
 		//filter these IPs for testing
@@ -739,15 +739,11 @@ func (t *Torrent) gotInfoHash() {
 func (t *Torrent) gotInfo() {
 	defer close(t.InfoC)
 	if t.mi.InfoBytes != nil {
-		//we had the info from start up. Create a utmetadata struct in order
-		//to upload if asked from a peer
 		if len(t.utmetadata.m) > 0 {
 			panic("got info")
 		}
 		infoBytes := t.mi.InfoBytes
 		ut := newUtMetadata(len(infoBytes))
-		// At this point, no connection has being made because t hasn't exposed its
-		// existance to Client (so no incoming connections) and we haven't actively try
 		// to connect to peers (outgoing) so it is safe to acess these without lock
 		t.utmetadata.correctSize = int64(len(infoBytes))
 		t.utmetadata.m[int64(len(infoBytes))] = ut
@@ -797,17 +793,8 @@ func (t *Torrent) blockSize() int {
 	return maxRequestBlockSz
 }
 
-/*
-func (t *Torrent) scrapeTracker() (*tracker.ScrapeResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-	return t.trackerURL.Scrape(ctx, t.mi.Info.Hash)
-}
-*/
-
 func (t *Torrent) haveInfo() bool {
 	//return t.mi.Info != nil
-	//TODO: this is not good (but it is safe since only torrent can write to this variable)
 	return t.utmetadata.correctSize != 0
 }
 

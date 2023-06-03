@@ -21,7 +21,7 @@ type HandShake struct {
 	PeerID   [20]byte
 }
 
-//h.InfoHash should be zero if are going to be recipient.
+// h.InfoHash should be zero if are going to be recipient.
 func (h *HandShake) Do(rw io.ReadWriter) (*HandShake, error) {
 	//check if we are initiator or recipients
 	switch {
@@ -32,8 +32,8 @@ func (h *HandShake) Do(rw io.ReadWriter) (*HandShake, error) {
 	}
 }
 
-//initiate should be called when a client wants to initiate
-//a handshake .InfoHash field should not be empty.
+// initiate should be called when a client wants to initiate
+// a handshake .InfoHash field should not be empty.
 func (h *HandShake) initiate(rw io.ReadWriter) (*HandShake, error) {
 	var err error
 	if err = h.write(rw); err != nil {
@@ -49,9 +49,9 @@ func (h *HandShake) initiate(rw io.ReadWriter) (*HandShake, error) {
 	return _h, nil
 }
 
-//receipt should be called when client is the recipient
-//of a handshake. InfoHash field must be zero - will be
-//filled inside.
+// receipt should be called when client is the recipient
+// of a handshake. InfoHash field must be zero - will be
+// filled inside.
 func (h *HandShake) receipt(rw io.ReadWriter) (*HandShake, error) {
 	var err error
 	var _h *HandShake
@@ -68,7 +68,7 @@ func (h *HandShake) receipt(rw io.ReadWriter) (*HandShake, error) {
 	return _h, nil
 }
 
-//write sends write the bytes of h to conn.
+// write sends write the bytes of h to conn.
 func (h *HandShake) write(conn io.Writer) error {
 	var b bytes.Buffer
 	if err := writeBinary(&b, protoLen, proto, h); err != nil {
